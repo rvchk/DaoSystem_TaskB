@@ -1,0 +1,14 @@
+Ivan {
+  password: qwerty1
+  key: kjfhas0153pasdnfa
+}
+
+Semen {
+  password: qwerty2
+  key: dfas23d513fa41s
+}
+
+Petr {
+  password: qwerty3
+  key: 78jgqdg41as512po
+}
