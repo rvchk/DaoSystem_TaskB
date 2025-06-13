@@ -1,0 +1,25 @@
+{
+  "name": "application",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.12.6",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "fabric-ca-client": "^2.2.20",
+    "fabric-gateway": "^0.1.0-dev.20211029.6",
+    "fabric-network": "^2.2.20",
+    "web3": "^4.16.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
