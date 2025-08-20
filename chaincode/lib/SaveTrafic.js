@@ -365,6 +365,10 @@ class SaveTrafic extends Contract {
     await ctx.stub.putState("Bank", Buffer.from(JSON.stringify(bank)))
   }
 
+  async processEthereumEvent(ctx, eventDescription) {
+        console.log('Received event description:', eventDescription);
+  }
+
   async issueFine(ctx, dpslogin, recipientLogin) {
     this.isDpsOfficer(ctx, dpslogin);
 

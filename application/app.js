@@ -1,16 +1,15 @@
 const FabricCAServices = require("fabric-ca-client")
 const path = require("path")
-const { Web3 } = require("web3")
-const contractABI = require("./abi.json")
-const byteCode = require("./bytecode")
 const express = require("express")
-const { buildCCPOrg1, buildCCPOrg2, buildWallet } = require('./AppUtil.js')
-const { registerAndEnrollUser, buildCAClient, enrollAdmin } = require('./CAUtil.js')
+const { buildCCPOrg1, buildCCPOrg2, buildWallet } = require('./utils/AppUtil.js')
+const { registerAndEnrollUser, buildCAClient, enrollAdmin } = require('./utils/CAUtil.js')
 const { Wallets, Gateway } = require("fabric-network")
 const crypto = require("crypto")
 const { startListening } = require("./oracle.js")
 let deployed = {}
 let deployedContract = ''
+
+const { initEventListener } = require('./oracle.js')
 
 const app = express()
 app.use(express.json())
@@ -46,10 +45,6 @@ async function registerUser(organization, login) {
     const wallet = await buildWallet(Wallets, buildWalletPath(organization))
     await registerAndEnrollUser(caClient, wallet, orgMpsIds[organization], login, `${organization}.department1`)
 }
-
-setInterval(async() => {
-    console.log("hey")
-}, 10000);
 
 async function registerAdmin(organization) {
     const ccp = buildCCP(organization)
@@ -292,43 +287,11 @@ const main = async () => {
     await regUser("org1", "Ivan")
     await regUser("org1", "Semen")
     await regUser("org1", "Petr")
+
 }
 
 main().catch(console.error);
 
 app.listen(3000, async () => {
-  const web3 = new Web3("http://localhost:8545")
-
-  try {
-    // Получаем список аккаунтов
-    const accounts = await web3.eth.getAccounts()
-    const ownerAddress = accounts[0]
-
-    console.log("Используем аккаунт:", ownerAddress)
-
-    // Создаём экземпляр контракта
-    const contract = new web3.eth.Contract(contractABI)
-    const deployedTransaction = contract.deploy({ data: byteCode })
-
-    // Оцениваем gas
-    const gas = "9986871"
-    const gasPrice = await web3.eth.getGasPrice()
-
-    // Параметры транзакции
-    const options = {
-      from: ownerAddress,
-      gas,
-      gasPrice
-    }
-
-    // Отправляем транзакцию
-    deployed = await deployedTransaction.send(options)
-    deployedContract = deployed.options.address
-    console.log("Контракт развернут по адресу:", deployedContract)
-
-    await startListening(deployed, postFunc)
-
-  } catch (err) {
-    console.error("Ошибка при деплое контракта:", err.message)
-  }
+    initEventListener(myContractName, postFunc)
 })

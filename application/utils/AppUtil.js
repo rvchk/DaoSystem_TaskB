@@ -11,7 +11,9 @@ const path = require('path');
 
 exports.buildCCPOrg1 = () => {
 	// load the common connection configuration file
-	const ccpPath = path.resolve(__dirname, '..', 'fabric-samples', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
+	
+	// Тут внимательно смотреть на ошибки связанные с путями, у меня было, что fabric-samples искалось в application
+	const ccpPath = path.resolve(__dirname, '../..', 'fabric-samples', 'test-network', 'organizations', 'peerOrganizations', 'org1.example.com', 'connection-org1.json');
 	const fileExists = fs.existsSync(ccpPath);
 	if (!fileExists) {
 		throw new Error(`no such file or directory: ${ccpPath}`);
