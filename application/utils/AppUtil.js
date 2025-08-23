@@ -29,7 +29,7 @@ exports.buildCCPOrg1 = () => {
 
 exports.buildCCPOrg2 = () => {
 	// load the common connection configuration file
-	const ccpPath = path.resolve(__dirname, '..', 'fabric-samples', 'test-network',
+	const ccpPath = path.resolve(__dirname, '../..', 'fabric-samples', 'test-network',
 		'organizations', 'peerOrganizations', 'org2.example.com', 'connection-org2.json');
 	const fileExists = fs.existsSync(ccpPath);
 	if (!fileExists) {

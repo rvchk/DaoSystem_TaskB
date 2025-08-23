@@ -1,8 +1,8 @@
 'use strict';
 
 const SaveTrafic = require("./lib/SaveTrafic")
-const MyToken = require("./lib/MyToken")
+const Startup = require("./lib/DaoSystem")
 
-module.exports.MyToken = MyToken
 module.exports.SaveTrafic = SaveTrafic
-module.exports.contracts = [SaveTrafic, MyToken]
+module.exports.Startup = SaveTrafic
+module.exports.contracts = [SaveTrafic, Startup]

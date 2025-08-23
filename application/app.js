@@ -5,11 +5,6 @@ const { buildCCPOrg1, buildCCPOrg2, buildWallet } = require('./utils/AppUtil.js'
 const { registerAndEnrollUser, buildCAClient, enrollAdmin } = require('./utils/CAUtil.js')
 const { Wallets, Gateway } = require("fabric-network")
 const crypto = require("crypto")
-const { startListening } = require("./oracle.js")
-let deployed = {}
-let deployedContract = ''
-
-const { initEventListener } = require('./oracle.js')
 
 const app = express()
 app.use(express.json())
@@ -20,11 +15,11 @@ app.use((req, res, next) => {
 })
 
 const channelName = 'blockchain2025'
-const chaincodeName = 'save-traffic-system'
-const myContractName = "SaveTrafic"
+const chaincodeName = 'dao-system'
+const myContractName = "DaoSystem"
 const orgMpsIds = {
-    "org1": "Users",
-    "org2": "Bank"
+    "org1": "Fond",
+    "org2": "Startups"
 }
 
 const hash = (data) => {
@@ -58,9 +53,11 @@ async function getGateway(organization, login) {
         const ccp = buildCCP(organization)
         const wallet = await buildWallet(Wallets, buildWalletPath(organization))
         const identity = await wallet.get(login)
+
+        
         const gateway = new Gateway()
         await gateway.connect(ccp, {
-            wallet, identity, discovery: { enabled: true, asLocalhost: true }
+            wallet, identity, discovery: { enabled: true, asLocalhost: true },
         })
         return gateway
     } catch (e) {
@@ -68,6 +65,7 @@ async function getGateway(organization, login) {
         throw new Error(e)
     }
 }
+
 
 async function getContract(gateway, contractName) {
     try {
@@ -87,7 +85,6 @@ async function postFunc(contractName, organization, login, func, args) {
         const result = await contract.submitTransaction(func, ...args)
 
         gateway.disconnect()
-
         return result.toString()
     } catch (e) {
         console.error(`Failed to submit transaction: ${e}`)
@@ -107,42 +104,13 @@ async function getFunc(contractName, organization, login, func, args) {
     }
 }
 
-app.get("/getAllUsers", async (req, res) => {
+app.post("/sendEvent", async(req, res) => {
     try {
-        let users = await getFunc(myContractName, "org1", "admin", "getAllUsers", [])
-        users = JSON.parse(users)
-        res.status(200).json({ users });
+        const { event } = req.body
+        await postFunc(myContractName, "org1", "admin", "fetchEvent", [event])
+        res.send("Event is sended")
     } catch (e) {
         console.error(e)
-    }
-})
-
-app.get("/getContractId", async (req, res) => {
-    try {
-        res.status(200).json({ contractId: deployedContract });
-    } catch (e) {
-        console.error(e)
-    }
-})
-
-app.post("/enrollAdmin", async (req, res) => {
-    const { organization } = req.body
-    try {
-        await registerAdmin(organization)
-        res.status(200).json({ message: "Admin enrolled successfully" });
-    } catch (e) {
-        console.error(e);
-        res.status(500).json({ error: e.toString() });
-    }
-})
-
-app.post("/enrollUser", async (req, res) => {
-    const { organization, login } = req.body
-    try {
-        await registerUser(organization, login)
-        res.send("User enrolled")
-    } catch (e) {
-        res.send(e)
     }
 })
 
@@ -165,56 +133,6 @@ app.post("/register", async (req, res) => {
         await postFunc(myContractName, "org1", "admin", "register", [login, password, key, fio, role, drivingTime, balance])
         await registerUser("org1", login)
         res.send("User is registered")
-    } catch (e) {
-        console.error(e)
-    }
-})
-
-app.post("/requestLicense", async (req, res) => {
-    try {
-        const { login, licenseNumber } = req.body
-        await postFunc(myContractName, "org1", "admin", "requestLicense", [login, licenseNumber])
-        res.send("License is requested to DPS")
-    } catch (e) {
-        console.error(e)
-    }
-})
-
-app.post("/approveLicense", async (req, res) => {
-    try {
-        const { dpsLogin, recipientLogin, requestIndex } = req.body
-        await postFunc(myContractName, "org1", "admin", "approveLicense", [dpsLogin, recipientLogin, requestIndex])
-        res.send("License is approved")
-    } catch (e) {
-        console.error(e)
-    }
-})
-
-app.post("/requestVehicle", async (req, res) => {
-    try {
-        const { login, category, marketPrice, usabilityDate } = req.body
-        await postFunc(myContractName, "org1", "admin", "approveLicense", [login, category, marketPrice, usabilityDate])
-        res.send("License is approved")
-    } catch (e) {
-        console.error(e)
-    }
-})
-
-app.post("/issueFine", async (req, res) => {
-    try {
-        const { dpsLogin, recipientLogin } = req.body
-        await postFunc(myContractName, "org1", "admin", "issueFine", [dpsLogin, recipientLogin])
-        res.send("Fine is issued")
-    } catch (e) {
-        console.error(e)
-    }
-})
-
-app.post("/payFine/:login", async (req, res) => {
-    try {
-        const { login } = req.params
-        await postFunc(myContractName, "org1", "admin", "payFine", [login])
-        res.send("Fine is payed")
     } catch (e) {
         console.error(e)
     }
@@ -247,31 +165,13 @@ app.get('/getAllUsers', async (req, res) => {
     }
 })
 
-app.get("/getTestTime", async (req, res) => {
+app.get('/getEvent', async (req, res) => {
     try {
-        const test = await getFunc(myContractName, "org1", "admin", "getTestTime", [])
-        res.send(test)
-    } catch (e) {
-        console.error(e)
-    }
-})
-
-app.get("/getAllLicenses", async (req, res) => {
-    try {
-        const result = await getFunc(myContractName, "org1", "admin", "getAllLicenses", [])
+        const { id } = req.params
+        const result = await getFunc(myContractName, "org1", "admin", "getEvent", [])
         res.send(result)
-    } catch (e) {
-        console.error(e)
-    }
-})
-
-app.get("/getBalance/:login", async (req, res) => {
-    try {
-        const { login } = req.params
-        const balance = await getFunc(myContractName, "org1", "admin", "getBalance", [login])
-        res.send(balance)
-    } catch (e) {
-        console.error(e)
+    } catch(e) {
+        res.status(500).send(e.message)
     }
 })
 
@@ -279,19 +179,10 @@ const main = async () => {
     async function regAdmin(organization) {
         await registerAdmin(organization)
     }
-    async function regUser(organization, login) {
-        await registerUser(organization, login)
-    }
 
     await regAdmin("org1")
-    await regUser("org1", "Ivan")
-    await regUser("org1", "Semen")
-    await regUser("org1", "Petr")
-
 }
 
 main().catch(console.error);
 
-app.listen(3000, async () => {
-    initEventListener(myContractName, postFunc)
-})
+app.listen(3000)
