@@ -1,0 +1,322 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  place-items: center;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h1 {
+  font-size: 3.2em;
+  margin-bottom: 30px;
+  margin-top: 20px;
+}
+
+h2 {
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+h3 {
+  margin-bottom: 10px;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #e6e6e6;
+  cursor: pointer;
+  transition: ease all 200ms;
+}
+
+button:hover {
+  background-color: #d3d3d3;
+}
+
+select {
+  padding: 5px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+input {
+  width: 200px;
+  display: block;
+  margin: 0 auto;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 10px;
+  border: 1px solid black;
+}
+
+.form-control {
+  width: 200px;
+}
+
+.userCard {
+  margin: 0 auto;
+  width: 400px;
+  padding: 10px;
+  margin-top: 50px;
+  margin-bottom: 30px;
+  border-radius: 15px;
+  box-shadow: 0px 5px 20px 5px rgb(216, 216, 216);
+  text-align: left;
+}
+
+.userCard img {
+  margin-inline: 10px;
+}
+
+.userCard h1 {
+  margin: 0px;
+}
+
+.userCard h2 {
+  margin-bottom: 5px;
+  font-size: 24px;
+}
+
+.AllVotings {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.AllProposals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1300px) {
+  .AllProposals,
+  .AllVotings {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .AllProposals,
+  .AllVotings {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.ProposalCard {
+  text-align: left;
+  display: block;
+  width: 400px;
+  background-color: rgb(233, 231, 231);
+  border-radius: 20px;
+  padding: 15px;
+  margin-inline: 10px;
+  position: relative;
+  transition: all ease 200ms;
+}
+
+.ProposalCard {
+  opacity: 100;
+}
+
+.ProposalCard h3 {
+  font-size: 20px;
+  text-align: center;
+}
+
+.ProposalCard p {
+  margin-bottom: 5px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.ProposalCard button {
+  margin: 0 auto;
+}
+
+.ProposalCard div {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.votingTimer {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.deleteIcon img {
+  width: 30px;
+  height: 30px;
+}
+
+.deleteIcon {
+  padding: 0px;
+  position: absolute;
+  margin: 5px;
+  right: 0;
+  top: 0;
+}
+
+.userInfoBlock {
+  display: flex;
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 10px;
+  border-radius: 15px;
+  padding: 8px;
+  box-shadow: 0px 5px 20px 5px rgb(216, 216, 216);
+}
+
+.backButton {
+  display: flex;
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 10px;
+  border-radius: 15px;
+  padding: 8px;
+  box-shadow: 0px 5px 15px 5px rgb(216, 216, 216);
+  background-color: white;
+  margin-top: 20px;
+}
+
+.backButton:hover {
+  background-color: rgb(235, 235, 235);
+}
+
+.backButton img {
+  width: 30px;
+  height: 30px;
+}
+
+.userInfoName {
+  color: black;
+  font-size: 20px;
+  transition: ease all 100ms;
+  margin-top: 10px;
+}
+
+.userInfoName:hover {
+  transform: scale(1.1);
+}
+
+.userInfoBalances p {
+  text-align: left;
+  margin: 5px;
+  margin-left: 10px;
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.links {
+  margin-bottom: 20px;
+}
+
+@media (max-width: 650px) {
+  .links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .userCard {
+    display: block;
+    text-align: center;
+  }
+}
+
+.routeLink {
+  padding: 10px;
+  border-radius: 8px;
+  color: white;
+  background-color: #6c757d;
+  margin-inline: 10px;
+  transition: ease all 200ms;
+}
+
+.routeLink:hover {
+  background-color: #5c636a;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+}
+
+.creator {
+  color: black;
+  border: solid 1px black;
+  border-radius: 10px;
+  padding: 5px;
+  width: 300px;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
+.copyButton {
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 5px;
+  background-color: rgb(211, 211, 211);
+  margin-left: 5px;
+  transition: ease all 200ms;
+}
+
+.copyButton:hover {
+  background-color: rgb(190, 190, 190);
+}
+
+.fetchAccountsBar {
+  margin: 0 auto;
+  margin-top: 30px;
+  display: block;
+}
+
+#checkbox-true,
+#checkbox-false {
+  width: 25px;
+}
+
+.checkbox-block {
+  display: "flex";
+  margin-bottom: 15px;
+}
+
+.checkbox-block div {
+  width: 100px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.checkbox-block label {
+  padding-right: 20px;
+}
+
+.checkbox-block input {
+  display: inline;
+}
