@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 
 const DataContext = createContext();
 
-export function DataProvider({ children }) {
+export default function DataProvider({ children }) {
   return (
     <DataContext.Provider value={DataContext}>{children}</DataContext.Provider>
   );

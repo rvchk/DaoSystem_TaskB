@@ -114,11 +114,24 @@ app.post("/sendEvent", async(req, res) => {
     }
 })
 
-app.post("/auth", async (req, res) => {
+app.get("/loginToManagement", async (req, res) => {
     try {
-        const { login, password, key } = req.body
-        const result = await getFunc(myContractName, "org1", login, "auth", [login, password, key])
+        const { address, password } = req.body
+        const result = await getFunc(myContractName, "org1", login, "loginToManagement", [address, password])
         res.status(200).json({ user: result })
+    } catch (err) {
+        console.error(err)
+        res.status(401).json({
+            error: "Неправильный логин, пароль или ключ"
+        })
+    }
+})
+
+app.get("/getStartup", async (req, res) => {
+    try {
+        const { address } = req.body
+        const result = await getFunc(myContractName, "org1", login, "getStartup", [address])
+        res.status(200).json({ startup: JSON.parse(result) })
     } catch (err) {
         console.error(err)
         res.status(401).json({
@@ -127,26 +140,14 @@ app.post("/auth", async (req, res) => {
     }
 })
 
-app.post("/register", async (req, res) => {
+app.post("/createStartup", async (req, res) => {
     try {
-        const { login, password, key, fio, role, drivingTime, balance } = req.body
-        await postFunc(myContractName, "org1", "admin", "register", [login, password, key, fio, role, drivingTime, balance])
-        await registerUser("org1", login)
-        res.send("User is registered")
+        const { address, password } = req.body
+        console.log(address, password)
+        await postFunc(myContractName, "org1", "admin", "createStartup", [address, password])
+        res.send("Startup is registered")
     } catch (e) {
         console.error(e)
-    }
-})
-
-app.get("/getUser/:login", async (req, res) => {
-    try {
-        const { login } = req.params
-        const result = await getFunc(myContractName, "org1", login, "getUser", [login])
-        res.status(200).json({ user: JSON.parse(result) })
-    } catch (err) {
-        res.status(401).json({
-            error: err.message || "Неправильный логин, пароль или ключ"
-        })
     }
 })
 
@@ -156,7 +157,7 @@ app.get("/hash/:secret", async (req, res) => {
     res.status(200).json({ hash: result })
 })
 
-app.get('/getAllUsers', async (req, res) => {
+app.get('/getAllStartups', async (req, res) => {
     try {
         const result = await getFunc(myContractName, "org1", "admin", "getAllUsers", [])
         res.send(result)

@@ -1,8 +1,6 @@
 'use strict';
 
-const SaveTrafic = require("./lib/SaveTrafic")
-const Startup = require("./lib/DaoSystem")
+const DaoSystem = require("./lib/DaoSystem")
 
-module.exports.SaveTrafic = SaveTrafic
-module.exports.Startup = SaveTrafic
-module.exports.contracts = [SaveTrafic, Startup]
+module.exports.DaoSystem = DaoSystem
+module.exports.contracts = [DaoSystem]

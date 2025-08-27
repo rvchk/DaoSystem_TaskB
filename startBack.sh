@@ -2,8 +2,7 @@ cd fabric-samples/test-network
 
 ./network.sh down
 
-./network.sh up -ca
-./network.sh createChannel -c blockchain2025
+./network.sh up createChannel -c blockchain2025 -ca
 
 cd ../../chaincode
 npm install

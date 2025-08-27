@@ -1,19 +1,28 @@
-// import { useData } from "./data/DataProvider";
+import { useEffect } from "react";
 import FetchAccounts from "./components/shared/FetchAccounts";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function App() {
-  // const { startup } = useData();
+  const navigate = useNavigate();
+  useEffect(() => {
+    const status = localStorage.getItem("loggedIn");
+
+    if (!status) {
+      navigate("/login");
+    }
+  }, []);
 
   return (
     <div>
       <h1>Интерфейс приложения</h1>
       <div className="links">
+        <Link className="routeLink" to="/login">
+          Логин
+        </Link>
         <Link className="routeLink" to="/startup-profile">
           Личный кабинет
-          {/* Профиль {startup?.name} */}
         </Link>
-        <Link className="routeLink" to="/create-requests">
+        <Link className="routeLink" to="/create-requests" aria-disabled>
           Создать требования
         </Link>
         <Link className="routeLink" to="/control-department">

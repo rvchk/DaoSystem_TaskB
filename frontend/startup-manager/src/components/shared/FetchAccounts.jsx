@@ -1,16 +1,16 @@
 import { useEffect } from "react";
-import { Button } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import Button from "react-bootstrap/Button";
 
 export default function FetchAccounts() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!localStorage.getItem("selectedAcc")) {
+    if (!localStorage.getItem("currentStartup")) {
       window.ethereum
         .request({ method: "eth_requestAccounts" })
         .then((accounts) => {
-          localStorage.setItem("selectedAcc", accounts[0]);
+          localStorage.setItem("currentStartup", accounts[0]);
           location.reload();
         });
     }
@@ -18,7 +18,7 @@ export default function FetchAccounts() {
 
   useEffect(() => {
     window.ethereum.on("accountsChanged", (accounts) => {
-      localStorage.setItem("selectedAcc", accounts[0]);
+      localStorage.setItem("currentStartup", accounts[0]);
       location.reload();
     });
   }, []);
