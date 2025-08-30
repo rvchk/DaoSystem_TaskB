@@ -53,19 +53,20 @@ async function getGateway(organization, login) {
         const ccp = buildCCP(organization)
         const wallet = await buildWallet(Wallets, buildWalletPath(organization))
         const identity = await wallet.get(login)
-
-        
         const gateway = new Gateway()
         await gateway.connect(ccp, {
-            wallet, identity, discovery: { enabled: true, asLocalhost: true },
+            wallet, 
+            identity, 
+            discovery: { enabled: true, asLocalhost: true }, 
         })
+
+
         return gateway
     } catch (e) {
         console.error(`Failed to connect ${e}`)
         throw new Error(e)
     }
 }
-
 
 async function getContract(gateway, contractName) {
     try {
@@ -85,6 +86,7 @@ async function postFunc(contractName, organization, login, func, args) {
         const result = await contract.submitTransaction(func, ...args)
 
         gateway.disconnect()
+
         return result.toString()
     } catch (e) {
         console.error(`Failed to submit transaction: ${e}`)
@@ -117,8 +119,8 @@ app.post("/sendEvent", async(req, res) => {
 app.get("/loginToManagement", async (req, res) => {
     try {
         const { address, password } = req.body
-        const result = await getFunc(myContractName, "org1", login, "loginToManagement", [address, password])
-        res.status(200).json({ user: result })
+        const result = await getFunc(myContractName, "org1", "admin", "loginToManagement", [address, password])
+        res.status(200).json({ startup: result })
     } catch (err) {
         console.error(err)
         res.status(401).json({
@@ -130,7 +132,7 @@ app.get("/loginToManagement", async (req, res) => {
 app.get("/getStartup", async (req, res) => {
     try {
         const { address } = req.body
-        const result = await getFunc(myContractName, "org1", login, "getStartup", [address])
+        const result = await getFunc(myContractName, "org1", "admin", "getStartup", [address])
         res.status(200).json({ startup: JSON.parse(result) })
     } catch (err) {
         console.error(err)
@@ -143,11 +145,10 @@ app.get("/getStartup", async (req, res) => {
 app.post("/createStartup", async (req, res) => {
     try {
         const { address, password } = req.body
-        console.log(address, password)
         await postFunc(myContractName, "org1", "admin", "createStartup", [address, password])
         res.send("Startup is registered")
     } catch (e) {
-        console.error(e)
+        res.status(500).send(e.message)
     }
 })
 
@@ -169,7 +170,7 @@ app.get('/getAllStartups', async (req, res) => {
 app.get('/getEvent', async (req, res) => {
     try {
         const { id } = req.params
-        const result = await getFunc(myContractName, "org1", "admin", "getEvent", [])
+        const result = await getFunc(myContractName, "org1", "admin", "getEvent", [id])
         res.send(result)
     } catch(e) {
         res.status(500).send(e.message)

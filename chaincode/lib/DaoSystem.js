@@ -6,72 +6,20 @@ class DaoSystem extends Contract {
   async InitLedger(ctx) {
     console.log("Инициализация реестра...");
 
-    // const startups = [
-    //   {
-    //     ethereumAddress: ethereumAddress,
-    //     organization: "Startups",
-    //     fundingReceived: false,
-    //     totalFunding: 0,
-    //     departments: {
-    //       management: 0,
-    //       marketing: 0,
-    //       development: 0,
-    //       legal: 0,
-    //     },
-    //     requests: [],
-    //     managementPasswordHash: passwordHash,
-    //     managementLoggedIn: false,
-    //   }
-    // ];
-
-    // for (const startup of startups) {
-    //   // Проверяем, существует ли уже стартап
-    //   const existingStartupAsBytes = await ctx.getState(startup.ethereumAddress);
-    //   if (!existingStartupAsBytes || existingStartupAsBytes.length === 0) {
-    //     console.log(`Создаём начальный стартап: ${startup.ethereumAddress}`);
-    //     await ctx.setState(startup.ethereumAddress, Buffer.from(JSON.stringify(startup)));
-
-    //     // Записываем событие
-    //     await this.recordEvent(ctx, "INIT_LEDGER", {
-    //       startupAddress: startup.ethereumAddress,
-    //       message: "Initial startup created during ledger initialization",
-    //     });
-    //   }
-    // }
-
     console.log("Реестр успешно инициализирован");
   }
 
-  async hashPassword(password) {
-    return crypto.createHash("sha256").update(password).digest("hex");
-  }
-
-  // === Методы для работы с журналом активности ===
-  async recordEvent(ctx, eventType, data) {
-    const timestamp = new Date().toISOString();
-    const event = {
-      type: eventType,
-      data: data,
-      timestamp: timestamp,
-    };
-
-    const key = `event_${Date.now()}`;
-    await ctx.stub.setState(key, Buffer.from(JSON.stringify(event)));
-  }
-
   // === Создание нового стартапа с паролем управления ===
-  async createStartup(ctx, ethereumAddress, managementPassword) {
+  async createStartup(ctx, ethereumAddress, password) {
 
     const startupAsBytes = await ctx.stub.getState(ethereumAddress);
     if (startupAsBytes && startupAsBytes.length > 0) {
       throw new Error(`Стартап с адресом ${ethereumAddress} уже существует`);
     }
 
-    // Хэшируем пароль
-    const passwordHash = hashPassword(managementPassword);
-
     const startup = {
       ethereumAddress: ethereumAddress,
+      password: password,
       organization: "Startups",
       fundingReceived: false,
       totalFunding: 0,
@@ -82,11 +30,10 @@ class DaoSystem extends Contract {
         legal: 0,
       },
       requests: [],
-      managementPasswordHash: passwordHash, // Сохраняем хэш
       managementLoggedIn: false, // Сессия не активна
     };
 
-    await ctx.stub.setState(ethereumAddress, Buffer.from(JSON.stringify(startup)));
+    await ctx.stub.putState(ethereumAddress, Buffer.from(JSON.stringify(startup)));
   }
 
   // === Вход в отдел управления ===
@@ -99,14 +46,12 @@ class DaoSystem extends Contract {
 
       const startup = JSON.parse(startupAsBytes.toString());
 
-      const providedHash = hashPassword(password);
-
-      if (startup.managementPasswordHash !== providedHash) {
-          throw new Error('Неверный пароль');
+      if (startup.password !== password) {
+          throw new Error('Неверный пароль', startup.password, "  ", password);
       }
 
       startup.managementLoggedIn = true;      
-      this.getStartup(ethereumAddress)
+      return startup
   }
 
   // === Распределение средств между организациями ===
@@ -335,7 +280,7 @@ class DaoSystem extends Contract {
 
   // === Получение информации о стартапе ===
   async getStartup(ctx, startupAddress) {
-    const startupAsBytes = await ctx.getState(startupAddress);
+    const startupAsBytes = await ctx.stub.getState(startupAddress);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с адресом ${startupAddress} не найден`);
     }
