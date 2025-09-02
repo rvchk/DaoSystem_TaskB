@@ -50,13 +50,13 @@ class DaoSystem extends Contract {
           throw new Error('Неверный пароль', startup.password, "  ", password);
       }
 
-      startup.managementLoggedIn = true;      
+      startup.managementLoggedIn = true;
       return startup
   }
 
   // === Распределение средств между организациями ===
   async distributeFundsToStartup(ctx, startupId, amount) {
-    const startupAsBytes = await ctx.getState(startupId);
+    const startupAsBytes = await ctx.stub.getState(startupId);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${startupId} не найден`);
     }
@@ -72,17 +72,12 @@ class DaoSystem extends Contract {
     // Распределение внутри стартапа
     await this.distributeFundsInsideStartup(ctx, startupId, amount);
 
-    await ctx.setState(startupId, Buffer.from(JSON.stringify(startup)));
-
-    await this.recordEvent(ctx, "FUNDS_DISTRIBUTED_TO_STARTUP", {
-      startupId: startupId,
-      amount: amount,
-    });
+    await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
   }
 
   // === Распределение внутри стартапа ===
   async distributeFundsInsideStartup(ctx, startupId, totalAmount) {
-    const startupAsBytes = await ctx.getState(startupId);
+    const startupAsBytes = await ctx.stub.getState(startupId);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${startupId} не найден`);
     }
@@ -99,17 +94,12 @@ class DaoSystem extends Contract {
     startup.departments.development = totalAmount * developmentShare;
     startup.departments.legal = totalAmount * legalShare;
 
-    await ctx.setState(startupId, Buffer.from(JSON.stringify(startup)));
-
-    await this.recordEvent(ctx, "FUNDS_DISTRIBUTED_INSIDE_STARTUP", {
-      startupId: startupId,
-      distribution: startup.departments,
-    });
+    await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
   }
 
   // === Подача заявки на расходы (только не-управление) ===
   async submitExpenseRequest(ctx, startupId, department, purpose, amount) {
-    const startupAsBytes = await ctx.getState(startupId);
+    const startupAsBytes = await ctx.stub.getState(startupId);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${startupId} не найден`);
     }
@@ -137,21 +127,14 @@ class DaoSystem extends Contract {
     };
 
     startup.requests.push(request);
-    await ctx.setState(startupId, Buffer.from(JSON.stringify(startup)));
-
-    await this.recordEvent(ctx, "EXPENSE_REQUEST_SUBMITTED", {
-      requestId: requestId,
-      department: department,
-      amount: amount,
-      purpose: purpose,
-    });
+    await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
 
     console.log(`Заявка на расходы от ${department} отправлена: ${amount}`);
   }
 
   // === Одобрение/отклонение заявки (только управление) ===
   async approveExpenseRequest(ctx, startupId, requestId, action) {
-    const startupAsBytes = await ctx.getState(startupId);
+    const startupAsBytes = await ctx.stub.getState(startupId);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${startupId} не найден`);
     }
@@ -183,7 +166,7 @@ class DaoSystem extends Contract {
     }
 
     startup.requests[requestIndex] = request;
-    await ctx.setState(startupId, Buffer.from(JSON.stringify(startup)));
+    await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
 
     await this.recordEvent(ctx, `EXPENSE_REQUEST_${action.toUpperCase()}`, {
       requestId: requestId,
@@ -203,7 +186,7 @@ class DaoSystem extends Contract {
     toDepartment,
     amount
   ) {
-    const startupAsBytes = await ctx.getState(startupId);
+    const startupAsBytes = await ctx.stub.getState(startupId);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${startupId} не найден`);
     }
@@ -223,7 +206,7 @@ class DaoSystem extends Contract {
     startup.departments[fromDepartment] -= amount;
     startup.departments[toDepartment] += amount;
 
-    await ctx.setState(startupId, Buffer.from(JSON.stringify(startup)));
+    await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
 
     await this.recordEvent(ctx, "FUNDS_REDISTRIBUTED", {
       from: fromDepartment,
@@ -238,7 +221,7 @@ class DaoSystem extends Contract {
 
   // === Контроль за финансированием: авто-запрос на дофинансирование ===
   async checkAndCreateRefundRequest(ctx, startupId) {
-    const startupAsBytes = await ctx.getState(startupId);
+    const startupAsBytes = await ctx.stub.getState(startupId);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${startupId} не найден`);
     }
@@ -264,7 +247,7 @@ class DaoSystem extends Contract {
         };
 
         startup.requests.push(request);
-        await ctx.setState(startupId, Buffer.from(JSON.stringify(startup)));
+        await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
 
         await this.recordEvent(ctx, "AUTO_REFUND_REQUEST_CREATED", {
           department: dept,
@@ -287,22 +270,6 @@ class DaoSystem extends Contract {
 
     const startup = JSON.parse(startupAsBytes.toString());
     return startup
-  }
-
-  // === Получение всех событий ===
-  async getAllEvents(ctx) {
-    const allResults = [];
-    const iterator = await ctx.getStateByRange("", "");
-    let result = await iterator.next();
-
-    while (!result.done) {
-      if (result.value && result.value.value.toString()) {
-        allResults.push(JSON.parse(result.value.value.toString()));
-      }
-      result = await iterator.next();
-    }
-
-    return JSON.stringify(allResults);
   }
 
   // === Пример метода для обработки события из Ethereum ===

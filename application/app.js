@@ -55,11 +55,10 @@ async function getGateway(organization, login) {
         const identity = await wallet.get(login)
         const gateway = new Gateway()
         await gateway.connect(ccp, {
-            wallet, 
-            identity, 
-            discovery: { enabled: true, asLocalhost: true }, 
+            wallet,
+            identity,
+            discovery: { enabled: true, asLocalhost: true },
         })
-
 
         return gateway
     } catch (e) {
