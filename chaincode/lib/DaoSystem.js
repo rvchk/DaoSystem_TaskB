@@ -98,7 +98,7 @@ class DaoSystem extends Contract {
   }
 
   // === Подача заявки на расходы (только не-управление) ===
-  async submitExpenseRequest(ctx, startupId, department, purpose, amount) {
+  async sendRealisationRequest(ctx, startupId, department, purpose, percentage, fromStartBalance) {
     const startupAsBytes = await ctx.stub.getState(startupId);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${startupId} не найден`);
@@ -112,8 +112,11 @@ class DaoSystem extends Contract {
 
     // Проверяем, хватает ли средств у отдела
     const currentBalance = startup.departments[department];
-    if (currentBalance < amount) {
-      throw new Error(`Недостаточно средств в отделе ${department}`);
+    let amount = 0;
+    if (fromStartBalance) {
+      // от баланса при создании самого стартапа
+    } else {
+      amount = (currentBalance * percentage) / 100;
     }
 
     const requestId = `req_${Date.now()}`;
@@ -132,8 +135,7 @@ class DaoSystem extends Contract {
     console.log(`Заявка на расходы от ${department} отправлена: ${amount}`);
   }
 
-  // === Одобрение/отклонение заявки (только управление) ===
-  async approveExpenseRequest(ctx, startupId, requestId, action) {
+  async approveRealisationRequest(ctx, startupId, requestId, action) {
     const startupAsBytes = await ctx.stub.getState(startupId);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${startupId} не найден`);
@@ -161,62 +163,14 @@ class DaoSystem extends Contract {
 
     // При одобрении списываем средства
     if (action === "approve") {
-      const department = request.department;
-      startup.departments[department] -= request.amount;
+      startup.departments[request.department] += request.amount
+      startup.departments.management -= request.amount;
     }
 
     startup.requests[requestIndex] = request;
     await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
 
-    await this.recordEvent(ctx, `EXPENSE_REQUEST_${action.toUpperCase()}`, {
-      requestId: requestId,
-      department: request.department,
-      amount: request.amount,
-      status: request.status,
-    });
-
     console.log(`Заявка ${requestId} ${action}ирована`);
-  }
-
-  // === Перераспределение средств между отделами (только управление) ===
-  async redistributeFunds(
-    ctx,
-    startupId,
-    fromDepartment,
-    toDepartment,
-    amount
-  ) {
-    const startupAsBytes = await ctx.stub.getState(startupId);
-    if (!startupAsBytes || startupAsBytes.length === 0) {
-      throw new Error(`Стартап с ID ${startupId} не найден`);
-    }
-
-    const startup = JSON.parse(startupAsBytes.toString());
-
-    if (fromDepartment !== "management") {
-      throw new Error(
-        "Перераспределение может производить только отдел управления"
-      );
-    }
-
-    if (startup.departments[fromDepartment] < amount) {
-      throw new Error(`Недостаточно средств в отделе ${fromDepartment}`);
-    }
-
-    startup.departments[fromDepartment] -= amount;
-    startup.departments[toDepartment] += amount;
-
-    await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
-
-    await this.recordEvent(ctx, "FUNDS_REDISTRIBUTED", {
-      from: fromDepartment,
-      to: toDepartment,
-      amount: amount,
-    });
-
-    console.log(
-      `Средства в размере ${amount} перераспределены из ${fromDepartment} в ${toDepartment}`
-    );
   }
 
   // === Контроль за финансированием: авто-запрос на дофинансирование ===
@@ -248,15 +202,6 @@ class DaoSystem extends Contract {
 
         startup.requests.push(request);
         await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
-
-        await this.recordEvent(ctx, "AUTO_REFUND_REQUEST_CREATED", {
-          department: dept,
-          amount: request.amount,
-        });
-
-        console.log(
-          `Авто-запрос на дофинансирование для ${dept}: ${request.amount}`
-        );
       }
     }
   }

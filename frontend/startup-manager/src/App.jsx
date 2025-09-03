@@ -10,7 +10,7 @@ function App() {
     if (!status) {
       navigate("/login");
     }
-  }, []);
+  }, [navigate]);
 
   return (
     <div>
