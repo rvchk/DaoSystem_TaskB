@@ -1,13 +1,13 @@
 const contractABI = require("./abi/abi.json");
-const { postFunc } = require("./app")
 const { ethers } = require("ethers");
 const { Web3 } = require("web3")
-
 
 const web3 = new Web3("http://localhost:8545");
 const provider = new ethers.JsonRpcProvider("http://localhost:8545");
 const ownerAddress = "0xda82d8e188e355c380d77616B2b63b0267aA68eD";
 
+const myContractName = "DaoSystem";
+let lastProcessedEventId = null;
 let contract = null;
 let eventCount = 1;
 
@@ -28,17 +28,30 @@ async function initializeContract() {
 }
 
 // Получение событий ProposalCreated
-async function fetchProposalEvents(contract) {
+async function fetchProposalEvents(contract, postFunc) {
   try {
     const events = await contract.getPastEvents("allEvents", {
       fromBlock: 0,
       toBlock: "latest",
     });
+    events.shift()
 
     if (events.length > 0) {
-      console.log(`📊 Found ${events.length} events`);
       eventCount = events.length + 1;
-      console.log(events)
+    }
+
+    for (const event of events) {
+      const eventId = `${event.blockNumber}_${event.logIndex}`;
+      
+      // Проверяем, не обрабатывали ли мы это событие
+      if (!lastProcessedEventId || eventId > lastProcessedEventId) {
+        console.log("🆕 New event detected:", event.event);
+        handleEvent(event, postFunc)
+        console.log(`Отправил этот ивент = ${event.returnValues.id}`)
+        
+        // Обновляем последний обработанный ID
+        lastProcessedEventId = eventId;
+      }
     }
 
     return events;
@@ -47,14 +60,23 @@ async function fetchProposalEvents(contract) {
   }
 }
 
+async function handleEvent(event, postFunc) {
+  const eventId = event.returnValues.creator
+  if (event.event == "NewStartupInvestment") {
+    distributeFundsInsideStartup
+    await postFunc(myContractName, "org1", "admin", "createStartup", [eventId, event.returnValues.amount])
+    await postFunc(myContractName, "org1", "admin", "distributeFundsInsideStartup", [eventId, event.returnValues.amount])
+  }
+}
+
 // Основной цикл мониторинга
-async function monitorContract() {
+async function monitorContract(postFunc) {
   if (!contract) {
     await initializeContract();
   }
 
   if (contract) {
-    await fetchProposalEvents(contract);
+    await fetchProposalEvents(contract, postFunc);
   }
 }
 

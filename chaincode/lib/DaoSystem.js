@@ -3,26 +3,24 @@
 const { Contract } = require("fabric-contract-api");
 
 class DaoSystem extends Contract {
-  async InitLedger(ctx) {
-    console.log("Инициализация реестра...");
 
-    console.log("Реестр успешно инициализирован");
+  async InitLedger() {
+    console.log("Init")
   }
 
-  // === Создание нового стартапа с паролем управления ===
-  async createStartup(ctx, ethereumAddress, password) {
-
-    const startupAsBytes = await ctx.stub.getState(ethereumAddress);
+  // === Создание нового стартапа ===
+  async createStartup(ctx, address, amount) {
+    const startupAsBytes = await ctx.stub.getState(address);
     if (startupAsBytes && startupAsBytes.length > 0) {
-      throw new Error(`Стартап с адресом ${ethereumAddress} уже существует`);
+      throw new Error(`Стартап с адресом ${address} уже существует`);
     }
 
     const startup = {
-      ethereumAddress: ethereumAddress,
-      password: password,
+      address: address,
+      password: '',
       organization: "Startups",
-      fundingReceived: false,
-      totalFunding: 0,
+      fundingReceived: true,
+      totalFunding: amount,
       departments: {
         management: 0,
         marketing: 0,
@@ -30,18 +28,28 @@ class DaoSystem extends Contract {
         legal: 0,
       },
       requests: [],
-      managementLoggedIn: false, // Сессия не активна
+      managementLoggedIn: false,
     };
 
-    await ctx.stub.putState(ethereumAddress, Buffer.from(JSON.stringify(startup)));
+    await ctx.stub.putState(address, Buffer.from(JSON.stringify(startup)));
+    return startup;
+  }
+
+  async setPassword(ctx, address, password) {
+    const startupAsBytes = await ctx.stub.getState(address);
+
+    const startup = JSON.parse(startupAsBytes.toString());
+    startup.password = password
+
+    await ctx.stub.putState(address, Buffer.from(JSON.stringify(startup)));
   }
 
   // === Вход в отдел управления ===
-  async loginToManagement(ctx, ethereumAddress, password) {
-      const startupAsBytes = await ctx.stub.getState(ethereumAddress);
+  async loginToManagement(ctx, address, password) {
+      const startupAsBytes = await ctx.stub.getState(address);
 
       if (!startupAsBytes || startupAsBytes.length === 0) {
-          throw new Error(`Стартап с адресом ${ethereumAddress} не найден`);
+          throw new Error(`Стартап с адресом ${address} не найден`);
       }
 
       const startup = JSON.parse(startupAsBytes.toString());
@@ -52,27 +60,6 @@ class DaoSystem extends Contract {
 
       startup.managementLoggedIn = true;
       return startup
-  }
-
-  // === Распределение средств между организациями ===
-  async distributeFundsToStartup(ctx, startupId, amount) {
-    const startupAsBytes = await ctx.stub.getState(startupId);
-    if (!startupAsBytes || startupAsBytes.length === 0) {
-      throw new Error(`Стартап с ID ${startupId} не найден`);
-    }
-
-    const startup = JSON.parse(startupAsBytes.toString());
-    if (startup.fundingReceived) {
-      throw new Error(`Финансирование уже было распределено`);
-    }
-
-    startup.fundingReceived = true;
-    startup.totalFunding = amount;
-
-    // Распределение внутри стартапа
-    await this.distributeFundsInsideStartup(ctx, startupId, amount);
-
-    await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
   }
 
   // === Распределение внутри стартапа ===
@@ -89,10 +76,10 @@ class DaoSystem extends Contract {
     const developmentShare = 0.4;
     const legalShare = 0.05;
 
-    startup.departments.management = totalAmount * managementShare;
-    startup.departments.marketing = totalAmount * marketingShare;
-    startup.departments.development = totalAmount * developmentShare;
-    startup.departments.legal = totalAmount * legalShare;
+    startup.departments.management += totalAmount * managementShare;
+    startup.departments.marketing += totalAmount * marketingShare;
+    startup.departments.development += totalAmount * developmentShare;
+    startup.departments.legal += totalAmount * legalShare;
 
     await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
   }
@@ -221,7 +208,7 @@ class DaoSystem extends Contract {
   async handleEthereumEvent(ctx, eventType, payload) {
     const data = JSON.parse(payload);
     if (eventType === "NEW_STARTUP") {
-      await this.createStartup(ctx, data.startupId, data.ethereumAddress);
+      await this.createStartup(ctx, data.startupId, data.address);
     } else if (eventType === "VOTE_ACCEPTED") {
       await this.distributeFundsToStartup(ctx, data.startupId, data.amount);
     }

@@ -160,10 +160,24 @@ app.get("/getStartup", async (req, res) => {
 
 app.post("/createStartup", async (req, res) => {
   try {
-    const { address, password } = req.body;
+    const { address, amount } = req.body;
     await postFunc(myContractName, "org1", "admin", "createStartup", [
       address,
       password,
+      amount
+    ]);
+    res.send("Startup is registered");
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+app.post("/setPassword", async (req, res) => {
+  try {
+    const { address, password } = req.body;
+    await postFunc(myContractName, "org1", "admin", "setPassword", [
+      address,
+      password
     ]);
     res.send("Startup is registered");
   } catch (e) {
@@ -220,7 +234,9 @@ app.listen(3000, () => {
   console.log("🚀 Starting contract monitoring...");
   initializeContract();
 
-  setInterval(monitorContract, 3000);
+  setInterval(() => {
+    monitorContract(postFunc)
+  }, 3000);
 });
 
 module.exports = { postFunc }
