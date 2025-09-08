@@ -1,10 +1,26 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
+import { getStartup } from "./api/requests";
+import { useEffect } from "react";
 
 const DataContext = createContext();
 
 export default function DataProvider({ children }) {
+  const [startup, setStartup] = useState('');
+  const [startupAddress, setStartupAddress] = useState("")
+
+  async function fetchStartup() {
+    const result = await getStartup(startupAddress)
+    setStartup(result)
+  }
+
+  useEffect(() => {
+    fetchStartup()
+  }, [startupAddress])
+
   return (
-    <DataContext.Provider value={DataContext}>{children}</DataContext.Provider>
+    <DataContext.Provider value={{ startup, setStartup, setStartupAddress }}>
+      {children}
+    </DataContext.Provider>
   );
 }
 

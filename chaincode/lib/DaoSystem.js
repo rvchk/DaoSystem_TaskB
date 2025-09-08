@@ -59,6 +59,7 @@ class DaoSystem extends Contract {
       }
 
       startup.managementLoggedIn = true;
+      await ctx.stub.putState(address, Buffer.from(JSON.stringify(startup)));
       return startup
   }
 
@@ -76,10 +77,10 @@ class DaoSystem extends Contract {
     const developmentShare = 0.4;
     const legalShare = 0.05;
 
-    startup.departments.management += totalAmount * managementShare;
-    startup.departments.marketing += totalAmount * marketingShare;
-    startup.departments.development += totalAmount * developmentShare;
-    startup.departments.legal += totalAmount * legalShare;
+    startup.departments.management = totalAmount * managementShare;
+    startup.departments.marketing = totalAmount * marketingShare;
+    startup.departments.development = totalAmount * developmentShare;
+    startup.departments.legal = totalAmount * legalShare;
 
     await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
   }
@@ -194,10 +195,10 @@ class DaoSystem extends Contract {
   }
 
   // === Получение информации о стартапе ===
-  async getStartup(ctx, startupAddress) {
-    const startupAsBytes = await ctx.stub.getState(startupAddress);
+  async getStartup(ctx, address) {
+    const startupAsBytes = await ctx.stub.getState(address);
     if (!startupAsBytes || startupAsBytes.length === 0) {
-      throw new Error(`Стартап с адресом ${startupAddress} не найден`);
+      throw new Error(`Стартап с адресом ${address} не найден`);
     }
 
     const startup = JSON.parse(startupAsBytes.toString());

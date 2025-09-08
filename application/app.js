@@ -120,10 +120,10 @@ app.post("/sendEvent", async (req, res) => {
   }
 });
 
-app.get("/loginToManagement", async (req, res) => {
+app.post("/loginToManagement", async (req, res) => {
   try {
     const { address, password } = req.body;
-    const result = await getFunc(
+    const result = await postFunc(
       myContractName,
       "org1",
       "admin",
@@ -141,7 +141,7 @@ app.get("/loginToManagement", async (req, res) => {
 
 app.get("/getStartup", async (req, res) => {
   try {
-    const { address } = req.body;
+    const { address } = req.query
     const result = await getFunc(
       myContractName,
       "org1",

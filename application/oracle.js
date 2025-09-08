@@ -9,7 +9,7 @@ const ownerAddress = "0xda82d8e188e355c380d77616B2b63b0267aA68eD";
 const myContractName = "DaoSystem";
 let lastProcessedEventId = null;
 let contract = null;
-let eventCount = 1;
+let eventCount = 5;
 
 // Поиск и инициализация контракта
 async function initializeContract() {
@@ -42,13 +42,13 @@ async function fetchProposalEvents(contract, postFunc) {
 
     for (const event of events) {
       const eventId = `${event.blockNumber}_${event.logIndex}`;
-      
+
       // Проверяем, не обрабатывали ли мы это событие
       if (!lastProcessedEventId || eventId > lastProcessedEventId) {
         console.log("🆕 New event detected:", event.event);
         handleEvent(event, postFunc)
         console.log(`Отправил этот ивент = ${event.returnValues.id}`)
-        
+
         // Обновляем последний обработанный ID
         lastProcessedEventId = eventId;
       }
@@ -61,11 +61,10 @@ async function fetchProposalEvents(contract, postFunc) {
 }
 
 async function handleEvent(event, postFunc) {
-  const eventId = event.returnValues.creator
   if (event.event == "NewStartupInvestment") {
-    distributeFundsInsideStartup
-    await postFunc(myContractName, "org1", "admin", "createStartup", [eventId, event.returnValues.amount])
-    await postFunc(myContractName, "org1", "admin", "distributeFundsInsideStartup", [eventId, event.returnValues.amount])
+    console.log("EVENT", event.event)
+    await postFunc(myContractName, "org1", "admin", "createStartup", [event.returnValues.startup, event.returnValues.amount])
+    await postFunc(myContractName, "org1", "admin", "distributeFundsInsideStartup", [event.returnValues.startup, event.returnValues.amount])
   }
 }
 
