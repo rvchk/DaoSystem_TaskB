@@ -185,6 +185,36 @@ app.post("/setPassword", async (req, res) => {
   }
 });
 
+app.post("/approveRequest", async (req, res) => {
+  try {
+    const { address, requestId, action } = req.body;
+    await postFunc(myContractName, "org1", "admin", "setPassword", [
+      address,
+      requestId,
+      action
+    ]);
+    res.send("Startup is registered");
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+app.post("/sendRealisationRequest", async (req, res) => {
+  try {
+    const { address, department, purpose, percentage, fromStartBalance } = req.body;
+    await postFunc(myContractName, "org1", "admin", "sendRealisationRequest", [
+      address,
+      department,
+      purpose,
+      percentage,
+      fromStartBalance
+    ]);
+    res.send("Startup is registered");
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
 app.get("/hash/:secret", async (req, res) => {
   const { secret } = req.params;
   const result = hash(secret);

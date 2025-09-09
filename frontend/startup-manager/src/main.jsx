@@ -11,10 +11,10 @@ import Profile from "./pages/Profile.jsx";
 
 const routes = [
   { path: "/", component: App },
-  { path: "/startup-profile", component: Profile },
+  { path: "profile", component: Profile },
   { path: "/create-requests", component: Requests },
-  { path: "/control-department", component: ControlDepartment },
-  { path: "/dao-activity", component: DaoActivity },
+  { path: "/control", component: ControlDepartment },
+  { path: "/events", component: DaoActivity },
   { path: "/login", component: Login },
 ];
 

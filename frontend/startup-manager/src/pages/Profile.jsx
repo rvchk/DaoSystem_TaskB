@@ -2,8 +2,7 @@ import FetchAccounts from "../components/shared/FetchAccounts";
 import { useData } from "../utils/DataProvider";
 
 export default function Profile() {
-  const {startup} = useData()
-  console.log(startup)
+  let { startup } = useData();
 
   return (
     <>
@@ -14,27 +13,31 @@ export default function Profile() {
           <h2>Основная информация</h2>
           <div className="info-grid">
             <div className="info-item">
-              <span className="label">Адрес:</span>
-              <span className="value">{startup.address}</span>
+              <span className="label">Адрес: </span>
+              <span className="value">{startup?.address}</span>
             </div>
             <div className="info-item">
-              <span className="label">Организация:</span>
-              <span className="value">{startup.organization}</span>
+              <span className="label">Пароль: </span>
+              <span className="value">{startup?.password}</span>
             </div>
             <div className="info-item">
-              <span className="label">Общее финансирование:</span>
-              <span className="value">{startup.totalFunding} USD</span>
+              <span className="label">Организация: </span>
+              <span className="value">{startup?.organization}</span>
             </div>
             <div className="info-item">
-              <span className="label">Финансирование получено:</span>
+              <span className="label">Общее финансирование: </span>
+              <span className="value">{startup?.totalFunding} USD</span>
+            </div>
+            <div className="info-item">
+              <span className="label">Финансирование получено: </span>
               <span className="value">
-                {startup.fundingReceived ? '✅ Да' : '❌ Нет'}
+                {startup?.fundingReceived ? "✅ Да" : "❌ Нет"}
               </span>
             </div>
             <div className="info-item">
-              <span className="label">Менеджмент вошел:</span>
+              <span className="label">Менеджмент вошел: </span>
               <span className="value">
-                {startup.managementLoggedIn ? '✅ Да' : '❌ Нет'}
+                {startup?.managementLoggedIn ? "✅ Да" : "❌ Нет"}
               </span>
             </div>
           </div>
@@ -44,20 +47,28 @@ export default function Profile() {
           <h2>Бюджет по отделам</h2>
           <div className="departments-grid">
             <div className="department-item">
-              <span className="dept-label">Разработка:</span>
-              <span className="dept-amount">{startup.departments?.development || 0} USD</span>
+              <span className="dept-label">Менеджмент: </span>
+              <span className="dept-amount">
+                {startup?.departments?.management || 0} USD
+              </span>
             </div>
             <div className="department-item">
-              <span className="dept-label">Менеджмент:</span>
-              <span className="dept-amount">{startup.departments?.management || 0} USD</span>
+              <span className="dept-label">Разработка: </span>
+              <span className="dept-amount">
+                {startup?.departments?.development || 0} USD
+              </span>
             </div>
             <div className="department-item">
-              <span className="dept-label">Маркетинг:</span>
-              <span className="dept-amount">{startup.departments?.marketing || 0} USD</span>
+              <span className="dept-label">Маркетинг: </span>
+              <span className="dept-amount">
+                {startup?.departments?.marketing || 0} USD
+              </span>
             </div>
             <div className="department-item">
-              <span className="dept-label">Юридический:</span>
-              <span className="dept-amount">{startup.departments?.legal || 0} USD</span>
+              <span className="dept-label">Юридический: </span>
+              <span className="dept-amount">
+                {startup?.departments?.legal || 0} USD
+              </span>
             </div>
           </div>
         </div>
@@ -65,8 +76,8 @@ export default function Profile() {
         <div className="profile-section">
           <h2>Запросы</h2>
           <div className="requests-info">
-            {startup.requests && startup.requests.length > 0 ? (
-              <span>Активных запросов: {startup.requests.length}</span>
+            {startup?.requests && startup?.requests.length > 0 ? (
+              <span>Активных запросов: {startup?.requests.length}</span>
             ) : (
               <span>Нет активных запросов</span>
             )}

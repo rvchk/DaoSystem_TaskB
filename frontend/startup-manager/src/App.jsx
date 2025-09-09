@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 function App() {
   const navigate = useNavigate();
   useEffect(() => {
-    const status = localStorage.getItem("loggedIn");
+    const status = localStorage.getItem("currentStartup");
 
     if (!status) {
       navigate("/login");
@@ -19,16 +19,16 @@ function App() {
         <Link className="routeLink" to="/login">
           Логин
         </Link>
-        <Link className="routeLink" to="/startup-profile">
-          Личный кабинет
+        <Link className="routeLink" to="/profile">
+          Профиль
         </Link>
         <Link className="routeLink" to="/create-requests" aria-disabled>
           Создать требования
         </Link>
-        <Link className="routeLink" to="/control-department">
+        <Link className="routeLink" to="/control">
           Отдел управления
         </Link>
-        <Link className="routeLink" to="/dao-activity">
+        <Link className="routeLink" to="/events">
           Все события
         </Link>
       </div>

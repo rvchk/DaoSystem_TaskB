@@ -9,7 +9,7 @@ const ownerAddress = "0xda82d8e188e355c380d77616B2b63b0267aA68eD";
 const myContractName = "DaoSystem";
 let lastProcessedEventId = null;
 let contract = null;
-let eventCount = 5;
+let eventCount = 1;
 
 // Поиск и инициализация контракта
 async function initializeContract() {

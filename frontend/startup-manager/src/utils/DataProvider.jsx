@@ -5,20 +5,20 @@ import { useEffect } from "react";
 const DataContext = createContext();
 
 export default function DataProvider({ children }) {
-  const [startup, setStartup] = useState('');
-  const [startupAddress, setStartupAddress] = useState("")
+  const [startup, setStartup] = useState("");
+  const startupAddress = localStorage.getItem("currentStartup");
 
   async function fetchStartup() {
-    const result = await getStartup(startupAddress)
-    setStartup(result)
+    const result = await getStartup(startupAddress);
+    setStartup(result);
   }
 
   useEffect(() => {
-    fetchStartup()
-  }, [startupAddress])
+    fetchStartup();
+  }, [startupAddress]);
 
   return (
-    <DataContext.Provider value={{ startup, setStartup, setStartupAddress }}>
+    <DataContext.Provider value={{ startup, fetchStartup }}>
       {children}
     </DataContext.Provider>
   );

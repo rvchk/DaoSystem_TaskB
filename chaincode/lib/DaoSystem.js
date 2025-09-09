@@ -86,10 +86,10 @@ class DaoSystem extends Contract {
   }
 
   // === Подача заявки на расходы (только не-управление) ===
-  async sendRealisationRequest(ctx, startupId, department, purpose, percentage, fromStartBalance) {
-    const startupAsBytes = await ctx.stub.getState(startupId);
+  async sendRealisationRequest(ctx, address, department, purpose, percentage, fromStartBalance) {
+    const startupAsBytes = await ctx.stub.getState(address);
     if (!startupAsBytes || startupAsBytes.length === 0) {
-      throw new Error(`Стартап с ID ${startupId} не найден`);
+      throw new Error(`Стартап с ID ${address} не найден`);
     }
 
     const startup = JSON.parse(startupAsBytes.toString());
@@ -118,12 +118,12 @@ class DaoSystem extends Contract {
     };
 
     startup.requests.push(request);
-    await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
+    await ctx.stub.putState(address, Buffer.from(JSON.stringify(startup)));
 
     console.log(`Заявка на расходы от ${department} отправлена: ${amount}`);
   }
 
-  async approveRealisationRequest(ctx, startupId, requestId, action) {
+  async approveRequest(ctx, startupId, requestId, action) {
     const startupAsBytes = await ctx.stub.getState(startupId);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${startupId} не найден`);

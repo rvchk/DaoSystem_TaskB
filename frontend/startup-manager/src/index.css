@@ -321,3 +321,8 @@ input {
 .checkbox-block input {
   display: inline;
 }
+
+.label,
+.dept-label {
+  font-weight: 600;
+}
