@@ -160,11 +160,9 @@ app.get("/getStartup", async (req, res) => {
 
 app.post("/createStartup", async (req, res) => {
   try {
-    const { address, amount } = req.body;
+    const { address } = req.body;
     await postFunc(myContractName, "org1", "admin", "createStartup", [
-      address,
-      password,
-      amount
+      address
     ]);
     res.send("Startup is registered");
   } catch (e) {
@@ -188,7 +186,8 @@ app.post("/setPassword", async (req, res) => {
 app.post("/approveRequest", async (req, res) => {
   try {
     const { address, requestId, action } = req.body;
-    await postFunc(myContractName, "org1", "admin", "setPassword", [
+    console.log(address, requestId, action)
+    await postFunc(myContractName, "org1", "admin", "approveRequest", [
       address,
       requestId,
       action
@@ -201,13 +200,39 @@ app.post("/approveRequest", async (req, res) => {
 
 app.post("/sendRealisationRequest", async (req, res) => {
   try {
-    const { address, department, purpose, percentage, fromStartBalance } = req.body;
+    const { address, department, purpose, percentage } = req.body;
     await postFunc(myContractName, "org1", "admin", "sendRealisationRequest", [
       address,
       department,
       purpose,
       percentage,
-      fromStartBalance
+    ]);
+    res.send("Startup is registered");
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+app.post("/transferFromManagement", async (req, res) => {
+  try {
+    const { address, department, percentage } = req.body;
+    await postFunc(myContractName, "org1", "admin", "transferFromManagement", [
+      address,
+      department,
+      percentage,
+    ]);
+    res.send("Startup is registered");
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+app.post("/distributeFundsInsideStartup", async (req, res) => {
+  try {
+    const { address, amount } = req.body;
+    await postFunc(myContractName, "org1", "admin", "distributeFundsInsideStartup", [
+      address,
+      amount,
     ]);
     res.send("Startup is registered");
   } catch (e) {
@@ -261,12 +286,12 @@ main().catch(console.error);
 app.listen(3000, () => {
 
   // Запуск мониторинга
-  console.log("🚀 Starting contract monitoring...");
-  initializeContract();
+  // console.log("🚀 Starting contract monitoring...");
+  // initializeContract();
 
-  setInterval(() => {
-    monitorContract(postFunc)
-  }, 3000);
+  // setInterval(() => {
+  //   monitorContract(postFunc)
+  // }, 3000);
 });
 
 module.exports = { postFunc }

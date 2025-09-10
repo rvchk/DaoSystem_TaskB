@@ -62,8 +62,10 @@ async function fetchProposalEvents(contract, postFunc) {
 
 async function handleEvent(event, postFunc) {
   if (event.event == "NewStartupInvestment") {
-    console.log("EVENT", event.event)
-    await postFunc(myContractName, "org1", "admin", "createStartup", [event.returnValues.startup, event.returnValues.amount])
+    await postFunc(myContractName, "org1", "admin", "createStartup", [event.returnValues.startup])
+    await postFunc(myContractName, "org1", "admin", "distributeFundsInsideStartup", [event.returnValues.startup, event.returnValues.amount])
+  }
+  if (event.event == "StartupInvestment") {
     await postFunc(myContractName, "org1", "admin", "distributeFundsInsideStartup", [event.returnValues.startup, event.returnValues.amount])
   }
 }

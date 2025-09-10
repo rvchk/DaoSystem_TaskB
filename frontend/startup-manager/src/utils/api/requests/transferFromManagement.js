@@ -1,11 +1,11 @@
 import api from "../instance";
 
-export const approveRequest = async (address, requestId, action) => {
+export const transferFromManagement = async (address, department, percentage) => {
   try {
-    const response = await api.post("/approveRequest", {
+    const response = await api.post("/transferFromManagement", {
       address,
-      requestId,
-      action
+      department,
+      percentage,
     });
     return response.data;
   } catch (error) {

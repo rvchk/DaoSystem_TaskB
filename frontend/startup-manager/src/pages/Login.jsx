@@ -2,14 +2,12 @@ import Button from "react-bootstrap/esm/Button";
 import FetchAccounts from "../components/shared/FetchAccounts";
 import { setPassword, loginToManagement } from "../utils/api/requests";
 import { useRef } from "react";
-import { useData } from "../utils/DataProvider";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const passwordRef = useRef();
   const startup = useRef();
   const navigate = useNavigate();
-  const { fetchStartup } = useData();
 
   const initStartup = async () => {
     const startupAddress = startup.current.value;
@@ -23,8 +21,8 @@ export default function Login() {
     alert("Загрузка...");
     setTimeout(async () => {
       await loginToManagement(startupAddress, managementPassword);
-      await fetchStartup();
-      navigate("/startup-profile");
+      navigate("/profile");
+      location.reload()
     }, 3000);
   };
 

@@ -7,6 +7,7 @@ const DataContext = createContext();
 export default function DataProvider({ children }) {
   const [startup, setStartup] = useState("");
   const startupAddress = localStorage.getItem("currentStartup");
+  console.log(startupAddress)
 
   async function fetchStartup() {
     const result = await getStartup(startupAddress);

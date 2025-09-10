@@ -9,7 +9,7 @@ class DaoSystem extends Contract {
   }
 
   // === Создание нового стартапа ===
-  async createStartup(ctx, address, amount) {
+  async createStartup(ctx, address) {
     const startupAsBytes = await ctx.stub.getState(address);
     if (startupAsBytes && startupAsBytes.length > 0) {
       throw new Error(`Стартап с адресом ${address} уже существует`);
@@ -20,7 +20,7 @@ class DaoSystem extends Contract {
       password: '',
       organization: "Startups",
       fundingReceived: true,
-      totalFunding: amount,
+      totalFunding: 0,
       departments: {
         management: 0,
         marketing: 0,
@@ -64,11 +64,12 @@ class DaoSystem extends Contract {
   }
 
   // === Распределение внутри стартапа ===
-  async distributeFundsInsideStartup(ctx, startupId, totalAmount) {
-    const startupAsBytes = await ctx.stub.getState(startupId);
+  async distributeFundsInsideStartup(ctx, address, totalAmount) {
+    const startupAsBytes = await ctx.stub.getState(address);
     if (!startupAsBytes || startupAsBytes.length === 0) {
-      throw new Error(`Стартап с ID ${startupId} не найден`);
+      throw new Error(`Стартап с ID ${address} не найден`);
     }
+    totalAmount = parseFloat(totalAmount)
 
     const startup = JSON.parse(startupAsBytes.toString());
 
@@ -77,16 +78,18 @@ class DaoSystem extends Contract {
     const developmentShare = 0.4;
     const legalShare = 0.05;
 
-    startup.departments.management = totalAmount * managementShare;
-    startup.departments.marketing = totalAmount * marketingShare;
-    startup.departments.development = totalAmount * developmentShare;
-    startup.departments.legal = totalAmount * legalShare;
+    startup.departments.management += totalAmount * managementShare;
+    startup.departments.marketing += totalAmount * marketingShare;
+    startup.departments.development += totalAmount * developmentShare;
+    startup.departments.legal += totalAmount * legalShare;
 
-    await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
+    startup.totalFunding += totalAmount
+
+    await ctx.stub.putState(address, Buffer.from(JSON.stringify(startup)));
   }
 
   // === Подача заявки на расходы (только не-управление) ===
-  async sendRealisationRequest(ctx, address, department, purpose, percentage, fromStartBalance) {
+  async sendRealisationRequest(ctx, address, department, purpose, percentage, fromStartBalance = "false") {
     const startupAsBytes = await ctx.stub.getState(address);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${address} не найден`);
@@ -102,19 +105,29 @@ class DaoSystem extends Contract {
     const currentBalance = startup.departments[department];
     let amount = 0;
     if (fromStartBalance) {
-      // от баланса при создании самого стартапа
+      const departments = {
+        management: 0.45,
+        marketing: 0.1,
+        development: 0.4,
+        legal: 0.05
+      };
+
+      amount = startup.totalFunding * departments[department]
     } else {
-      amount = (currentBalance * percentage) / 100;
+      amount = (currentBalance * parseFloat(percentage)) / 100;
     }
 
-    const requestId = `req_${Date.now()}`;
+    const txId = ctx.stub.getTxID();
+    const requestCount = startup.requests.length;
+    const requestId = `req_${txId}_${requestCount}`;
+
     const request = {
       id: requestId,
       department: department,
       purpose: purpose,
       amount: amount,
       status: "pending", // pending, approved, rejected
-      submittedAt: new Date().toISOString(),
+      submittedAt: ctx.stub.getTxTimestamp().seconds.low * 1000,
     };
 
     startup.requests.push(request);
@@ -123,10 +136,10 @@ class DaoSystem extends Contract {
     console.log(`Заявка на расходы от ${department} отправлена: ${amount}`);
   }
 
-  async approveRequest(ctx, startupId, requestId, action) {
-    const startupAsBytes = await ctx.stub.getState(startupId);
+  async approveRequest(ctx, address, requestId, action) {
+    const startupAsBytes = await ctx.stub.getState(address);
     if (!startupAsBytes || startupAsBytes.length === 0) {
-      throw new Error(`Стартап с ID ${startupId} не найден`);
+      throw new Error(`Стартап с ID ${address} не найден`);
     }
 
     const startup = JSON.parse(startupAsBytes.toString());
@@ -147,7 +160,7 @@ class DaoSystem extends Contract {
     }
 
     request.status = action;
-    request.processedAt = new Date().toISOString();
+    request.processedAt = ctx.stub.getTxTimestamp().seconds.low * 1000;
 
     // При одобрении списываем средства
     if (action === "approve") {
@@ -156,16 +169,34 @@ class DaoSystem extends Contract {
     }
 
     startup.requests[requestIndex] = request;
-    await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
+    await ctx.stub.putState(address, Buffer.from(JSON.stringify(startup)));
 
     console.log(`Заявка ${requestId} ${action}ирована`);
   }
 
-  // === Контроль за финансированием: авто-запрос на дофинансирование ===
-  async checkAndCreateRefundRequest(ctx, startupId) {
-    const startupAsBytes = await ctx.stub.getState(startupId);
+  async transferFromManagement(ctx, address, department, percentage) {
+    const startupAsBytes = await ctx.stub.getState(address);
     if (!startupAsBytes || startupAsBytes.length === 0) {
-      throw new Error(`Стартап с ID ${startupId} не найден`);
+      throw new Error(`Стартап с ID ${address} не найден`);
+    }
+
+    const startup = JSON.parse(startupAsBytes.toString());
+
+    let amount = 0;
+    const currentBalance = startup.departments[department];
+    amount = (currentBalance * parseFloat(percentage)) / 100;
+
+    startup.departments[department] += amount;
+    startup.departments.management -= amount;
+
+    await ctx.stub.putState(address, Buffer.from(JSON.stringify(startup)));
+  }
+
+  // === Контроль за финансированием: авто-запрос на дофинансирование ===
+  async checkAndCreateRefundRequest(ctx, address) {
+    const startupAsBytes = await ctx.stub.getState(address);
+    if (!startupAsBytes || startupAsBytes.length === 0) {
+      throw new Error(`Стартап с ID ${address} не найден`);
     }
 
     const startup = JSON.parse(startupAsBytes.toString());
@@ -177,19 +208,22 @@ class DaoSystem extends Contract {
 
       if (initialAmount > 0 && currentAmount <= initialAmount * 0.1) {
         // Остаток ≤ 10% — создаем запрос
-        const requestId = `refund_req_${Date.now()}`;
+        const txId = ctx.stub.getTxID();
+        const requestCount = startup.requests.length;
+        const requestId = `req_${txId}_${requestCount}`;
+
         const request = {
           id: requestId,
           department: dept,
           purpose: "Автоматический запрос на дофинансирование",
           amount: initialAmount * 0.1,
           status: "pending",
-          submittedAt: new Date().toISOString(),
+          submittedAt: ctx.stub.getTxTimestamp().seconds.low * 1000,
           autoGenerated: true,
         };
 
         startup.requests.push(request);
-        await ctx.stub.putState(startupId, Buffer.from(JSON.stringify(startup)));
+        await ctx.stub.putState(address, Buffer.from(JSON.stringify(startup)));
       }
     }
   }
@@ -203,16 +237,6 @@ class DaoSystem extends Contract {
 
     const startup = JSON.parse(startupAsBytes.toString());
     return startup
-  }
-
-  // === Пример метода для обработки события из Ethereum ===
-  async handleEthereumEvent(ctx, eventType, payload) {
-    const data = JSON.parse(payload);
-    if (eventType === "NEW_STARTUP") {
-      await this.createStartup(ctx, data.startupId, data.address);
-    } else if (eventType === "VOTE_ACCEPTED") {
-      await this.distributeFundsToStartup(ctx, data.startupId, data.amount);
-    }
   }
 }
 

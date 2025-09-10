@@ -11,6 +11,7 @@ export default function Request(props) {
   const handleApprove = async (requestId) => {
     try {
       await approveRequest(startup.address, requestId, "approve");
+      console.log(startup.address, requestId)
       await fetchStartup();
     } catch (error) {
       console.error("Ошибка при одобрении:", error);
@@ -49,8 +50,8 @@ export default function Request(props) {
   return (
     <div key={request.id} className="col-md-6 col-lg-4">
       <Card>
-        <Card.Header className="d-flex align-items-center">
-          <span>Запрос #{request.id}</span>
+        <Card.Header className="text-center">
+          <span className="px-2">Запрос {request.id.slice(0, 8)}</span>
           <Badge bg={getStatusVariant(request.status)}>
             {request.status === "approved" && "Одобрено"}
             {request.status === "rejected" && "Отклонено"}
@@ -68,10 +69,12 @@ export default function Request(props) {
             <br />
             <strong>Дата:</strong>{" "}
             {new Date(request.submittedAt).toLocaleString('ru-RU')}
+            <br />
+            <strong>Статус: </strong>{request.status == "approve" ? "Принят" : "Отклонен"}
           </Card.Text>
 
           {request.status === "pending" && (
-            <div className="gap-2">
+            <div className="flex justify-evenly">
               <Button
                 variant="success"
                 size="sm"

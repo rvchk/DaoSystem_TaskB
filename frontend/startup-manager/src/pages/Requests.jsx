@@ -57,7 +57,7 @@ function CreateRequestPage() {
         startup.address,
         formData.department,
         formData.purpose,
-        parseFloat(formData.percentage),
+        formData.percentage.toString(),
         formData.fromStartBalance
       );
 
