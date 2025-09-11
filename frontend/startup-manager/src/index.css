@@ -326,3 +326,10 @@ input {
 .dept-label {
   font-weight: 600;
 }
+
+.eventCard {
+  width: 350px;
+  border: solid 1px rgb(190, 190, 190);
+  border-radius: 15px ;
+  margin-bottom: 10px;
+}

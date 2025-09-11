@@ -7,6 +7,7 @@ import Form from 'react-bootstrap/Form';
 import Card from 'react-bootstrap/Card'
 import Button from "react-bootstrap/esm/Button";
 import { transferFromManagement } from "../utils/api/requests";
+import FetchAccounts from "../components/shared/FetchAccounts";
 
 function ManagementDepartment() {
   const { startup } = useData();
@@ -109,6 +110,7 @@ function ManagementDepartment() {
               Выдать
             </Button>
         </Card>
+        <FetchAccounts />
       </div>
     );
 }

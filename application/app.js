@@ -246,28 +246,10 @@ app.get("/hash/:secret", async (req, res) => {
   res.status(200).json({ hash: result });
 });
 
-app.get("/getAllStartups", async (req, res) => {
+app.get("/getEvents", async (req, res) => {
   try {
-    const result = await getFunc(
-      myContractName,
-      "org1",
-      "admin",
-      "getAllUsers",
-      []
-    );
-    res.send(result);
-  } catch (e) {
-    res.status(500).send(e.message);
-  }
-});
-
-app.get("/getEvent", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await getFunc(myContractName, "org1", "admin", "getEvent", [
-      id,
-    ]);
-    res.send(result);
+    const result = await getFunc(myContractName, "org1", "admin", "getEvents", [])
+    res.send(JSON.parse(result));
   } catch (e) {
     res.status(500).send(e.message);
   }
@@ -286,12 +268,12 @@ main().catch(console.error);
 app.listen(3000, () => {
 
   // Запуск мониторинга
-  // console.log("🚀 Starting contract monitoring...");
-  // initializeContract();
+  console.log("🚀 Starting contract monitoring...");
+  initializeContract();
 
-  // setInterval(() => {
-  //   monitorContract(postFunc)
-  // }, 3000);
+  setInterval(() => {
+    monitorContract(postFunc)
+  }, 3000);
 });
 
 module.exports = { postFunc }

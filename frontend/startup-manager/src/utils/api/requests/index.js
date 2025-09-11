@@ -1,6 +1,15 @@
-export { getStartup } from "./getStartup";
-export { loginToManagement } from "./loginToManagement";
-export { setPassword } from "./setPassword";
-export { approveRequest } from "./approveRequest";
-export { sendRealisationRequest } from "./sendRealisationRequest"
-export { transferFromManagement } from "./transferFromManagement"
+import { getStartup } from "./getStartup";
+import { loginToManagement } from "./loginToManagement";
+import { setPassword } from "./setPassword";
+import { approveRequest } from "./approveRequest";
+import { sendRealisationRequest } from "./sendRealisationRequest"
+import { transferFromManagement } from "./transferFromManagement";
+
+export {
+  getStartup,
+  loginToManagement,
+  setPassword,
+  approveRequest,
+  sendRealisationRequest,
+  transferFromManagement
+}

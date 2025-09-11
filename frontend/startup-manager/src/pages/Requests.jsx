@@ -8,6 +8,7 @@ import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import FetchAccounts from "../components/shared/FetchAccounts";
 
 function CreateRequestPage() {
   const { startup } = useData();
@@ -124,15 +125,16 @@ function CreateRequestPage() {
                 {/* Причина/цель */}
                 <Form.Group className="mb-3">
                   <Form.Label>Причина/цель использования средств *</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={3}
+                  <Form.Select
                     name="purpose"
                     value={formData.purpose}
                     onChange={handleInputChange}
-                    placeholder="Опишите цель использования запрашиваемых средств..."
                     required
-                  />
+                  >
+                    <option value="" hidden>Выберите цель</option>
+                    <option value="realise">Реализация</option>
+                    <option value="getFinance">Дофинансирование</option>
+                  </Form.Select>
                 </Form.Group>
 
                 {/* Процент от бюджета */}
@@ -207,6 +209,7 @@ function CreateRequestPage() {
           </Card>
         </Col>
       </Row>
+      <FetchAccounts />
     </Container>
   );
 }

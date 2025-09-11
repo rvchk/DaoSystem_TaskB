@@ -7,6 +7,7 @@ const provider = new ethers.JsonRpcProvider("http://localhost:8545");
 const ownerAddress = "0xda82d8e188e355c380d77616B2b63b0267aA68eD";
 
 const myContractName = "DaoSystem";
+let contractAddress = '';
 let lastProcessedEventId = null;
 let contract = null;
 let eventCount = 1;
@@ -16,7 +17,7 @@ async function initializeContract() {
   const nonce = await provider.getTransactionCount(ownerAddress);
 
   if (nonce > 0) {
-  const contractAddress = ethers.getCreateAddress({
+  contractAddress = ethers.getCreateAddress({
       from: ownerAddress,
       nonce: nonce - eventCount,
   });
@@ -60,6 +61,24 @@ async function fetchProposalEvents(contract, postFunc) {
   }
 }
 
+function serializeEventData(event) {
+  // Создаем новый объект с дополнительным полем
+  const eventData = {
+      ...event.returnValues,
+      event: event.event // сохраняем оригинальное название события
+  };
+
+  return JSON.stringify(eventData, (key, value) => {
+      if (typeof value === 'bigint') {
+          return value.toString();
+      }
+      if (key === '__length__') {
+          return undefined;
+      }
+      return value;
+  });
+}
+
 async function handleEvent(event, postFunc) {
   if (event.event == "NewStartupInvestment") {
     await postFunc(myContractName, "org1", "admin", "createStartup", [event.returnValues.startup])
@@ -68,6 +87,8 @@ async function handleEvent(event, postFunc) {
   if (event.event == "StartupInvestment") {
     await postFunc(myContractName, "org1", "admin", "distributeFundsInsideStartup", [event.returnValues.startup, event.returnValues.amount])
   }
+  console.log(event.returnValues)
+  await postFunc(myContractName, "org1", "admin", "saveEvent", ['events', serializeEventData(event)])
 }
 
 // Основной цикл мониторинга
