@@ -1,3 +1,4 @@
+import { checkAndCreateRefundRequest } from "./management/checkAndCreateRefundRequest"
 import { transferFromManagement } from "./management/transferFromManagement";
 import { sendRealisationRequest } from "./user/sendRealisationRequest";
 import { approveRequest } from "./management/approveRequest";
@@ -12,4 +13,5 @@ export {
   approveRequest,
   sendRealisationRequest,
   transferFromManagement,
+  checkAndCreateRefundRequest
 };

@@ -26,8 +26,9 @@ export default function LoginForm() {
     return true;
   };
 
-  const initStartup = async () => {
-    setLoading(true)
+  const initStartup = async (e) => {
+    e.preventDefault()
+    setLoading(true);
     const startupAddress = startupRef.current.value;
     const managementPassword = passwordRef.current.value;
 
@@ -37,7 +38,7 @@ export default function LoginForm() {
 
     alert("Загрузка...");
     setTimeout(async () => {
-      setLoading(false)
+      setLoading(false);
       await loginToManagement(startupAddress, managementPassword);
       navigate("/profile");
       location.reload();
@@ -67,12 +68,20 @@ export default function LoginForm() {
             required
           />
         </Form.Group>
-        {error && <Alert className="mt-4" variant="danger">{error}</Alert>}
-        <Button className="mt-3" variant="outline-dark" disabled={error} type="submit">
-          {isLoading ? 'Загрузка...' : 'Задать пароль'}
+        {error && (
+          <Alert className="mt-4" variant="danger">
+            {error}
+          </Alert>
+        )}
+        <Button
+          className="mt-3"
+          variant="outline-dark"
+          disabled={error}
+          type="submit"
+        >
+          {isLoading ? "Загрузка..." : "Задать пароль"}
         </Button>
       </Form>
-
     </Card>
   );
 }

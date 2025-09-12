@@ -9,7 +9,7 @@ export default function FundTransferForm({ startup }) {
     percentage: "",
   });
 
-  const departments = getDepartments();
+  const departments = getDepartments(startup);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;

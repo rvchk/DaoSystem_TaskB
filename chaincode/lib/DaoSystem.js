@@ -93,7 +93,7 @@ class DaoSystem extends Contract {
   }
 
   // === Подача заявки на расходы (только не-управление) ===
-  async sendRealisationRequest(ctx, address, department, purpose, percentage, fromStartBalance = "false") {
+  async sendRealisationRequest(ctx, address, department, purpose, percentage, fromStartBalance) {
     const startupAsBytes = await ctx.stub.getState(address);
     if (!startupAsBytes || startupAsBytes.length === 0) {
       throw new Error(`Стартап с ID ${address} не найден`);
@@ -108,9 +108,11 @@ class DaoSystem extends Contract {
     // Проверяем, хватает ли средств у отдела
     let amount = 0;
     if (fromStartBalance) {
+      console.log("FromStart", startup.initialDepartments)
       const initialBalance = startup.initialDepartments[department];
-      amount = (initialBalance * parseFloat(percentage)) / 10
+      amount = (initialBalance * parseFloat(percentage)) / 100
     } else {
+      console.log("ELSE", startup.initialDepartments)
       const currentBalance = startup.departments[department];
       amount = (currentBalance * parseFloat(percentage)) / 100;
     }
@@ -172,7 +174,6 @@ class DaoSystem extends Contract {
     }
 
     startup.requests[requestIndex] = request;
-    await this.checkAndCreateRefundRequest(address)
     await ctx.stub.putState(address, Buffer.from(JSON.stringify(startup)));
 
     console.log(`Заявка ${requestId} ${action}ирована`);

@@ -16,7 +16,7 @@ export default function CreateRequestForm({ startup }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const departments = getDepartments();
+  const departments = getDepartments(startup);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;

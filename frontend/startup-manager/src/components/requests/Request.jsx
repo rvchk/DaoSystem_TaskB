@@ -1,4 +1,4 @@
-import { approveRequest } from "../../utils/api/requests";
+import { approveRequest, checkAndCreateRefundRequest } from "../../utils/api/requests";
 import { useData } from "../../utils/DataProvider";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
@@ -11,11 +11,13 @@ export default function Request({ request }) {
   const handleApprove = async (requestId, action) => {
     try {
       await approveRequest(startup.address, requestId, action);
+      await checkAndCreateRefundRequest(startup.address)
       await fetchStartup();
     } catch (error) {
       console.error("Ошибка при одобрении:", error);
     }
   };
+  console.log(startup.requests[0].id)
 
   return (
     <div key={request.id} className="col-md-6 col-lg-4">

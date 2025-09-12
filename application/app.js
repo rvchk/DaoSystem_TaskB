@@ -200,12 +200,13 @@ app.post("/approveRequest", async (req, res) => {
 
 app.post("/sendRealisationRequest", async (req, res) => {
   try {
-    const { address, department, purpose, percentage } = req.body;
+    const { address, department, purpose, percentage, fromStartBalance } = req.body;
     await postFunc(myContractName, "org1", "admin", "sendRealisationRequest", [
       address,
       department,
       purpose,
       percentage,
+      fromStartBalance
     ]);
     res.send("Startup is registered");
   } catch (e) {
@@ -234,6 +235,16 @@ app.post("/distributeFundsInsideStartup", async (req, res) => {
       address,
       amount,
     ]);
+    res.send("Startup is registered");
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+app.post("/checkAndCreateRefundRequest", async (req, res) => {
+  try {
+    const { address } = req.body;
+    await postFunc(myContractName, "org1", "admin", "checkAndCreateRefundRequest", [address]);
     res.send("Startup is registered");
   } catch (e) {
     res.status(500).send(e.message);

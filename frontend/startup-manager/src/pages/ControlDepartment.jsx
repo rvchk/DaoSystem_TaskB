@@ -3,6 +3,7 @@ import LoginModal from "../components/forms/LoginModal";
 import FetchAccounts from "../components/FetchAccounts";
 import { useData } from "../utils/DataProvider";
 import FundTransferForm from "../components/forms/FundTransferForm";
+import StartupRequests from "../components/requests/StartupRequests"
 
 function ManagementDepartment() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

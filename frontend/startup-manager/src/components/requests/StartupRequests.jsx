@@ -1,3 +1,4 @@
+import Request from "./Request"
 export default function StartupRequests({ startup }) {
   return (
     <div>
