@@ -1,13 +1,19 @@
-import api from "../instance";
+import api from "../../instance";
 
-export const sendRealisationRequest = async (address, department, purpose, percentage, fromStartBalance) => {
+export const sendRealisationRequest = async (
+  address,
+  department,
+  purpose,
+  percentage,
+  fromStartBalance,
+) => {
   try {
     const response = await api.post("/sendRealisationRequest", {
       address,
       department,
       purpose,
       percentage,
-      fromStartBalance
+      fromStartBalance,
     });
     return response.data;
   } catch (error) {

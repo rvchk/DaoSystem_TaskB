@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import FetchAccounts from "./components/shared/FetchAccounts";
+import FetchAccounts from "./components/FetchAccounts";
 import { Link, useNavigate } from "react-router-dom";
 
 function App() {

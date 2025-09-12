@@ -1,6 +1,10 @@
-import api from "../instance";
+import api from "../../instance";
 
-export const transferFromManagement = async (address, department, percentage) => {
+export const transferFromManagement = async (
+  address,
+  department,
+  percentage,
+) => {
   try {
     const response = await api.post("/transferFromManagement", {
       address,

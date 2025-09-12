@@ -1,11 +1,11 @@
-import api from "../instance";
+import api from "../../instance";
 
 export const approveRequest = async (address, requestId, action) => {
   try {
     const response = await api.post("/approveRequest", {
       address,
       requestId,
-      action
+      action,
     });
     return response.data;
   } catch (error) {

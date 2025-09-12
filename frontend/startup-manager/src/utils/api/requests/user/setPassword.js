@@ -1,8 +1,8 @@
-import api from "../instance";
+import api from "../../instance";
 
-export const loginToManagement = async (address, password) => {
+export const setPassword = async (address, password) => {
   try {
-    const response = await api.post("/loginToManagement", {
+    const response = await api.post("/setPassword", {
       address,
       password,
     });
